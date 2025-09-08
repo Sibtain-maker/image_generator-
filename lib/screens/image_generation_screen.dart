@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../services/stability_ai_service.dart';
-import '../services/api_key_service.dart';
 import '../models/stability_ai_models.dart';
 import '../config/api_config.dart';
 
@@ -16,7 +15,6 @@ class ImageGenerationScreen extends StatefulWidget {
 class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
   final TextEditingController _promptController = TextEditingController();
   final TextEditingController _negativePromptController = TextEditingController();
-  final TextEditingController _apiKeyController = TextEditingController();
   
   String _selectedAspectRatio = '1:1';
   String _selectedOutputFormat = 'png';
@@ -27,31 +25,10 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
   StabilityAIService? _stabilityService;
 
   @override
-  void initState() {
-    super.initState();
-    _loadSavedApiKey();
-  }
-
-  @override
   void dispose() {
     _promptController.dispose();
     _negativePromptController.dispose();
-    _apiKeyController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadSavedApiKey() async {
-    final savedApiKey = await ApiKeyService.getApiKey();
-    if (savedApiKey != null) {
-      setState(() {
-        _apiKeyController.text = savedApiKey;
-      });
-    } else {
-      setState(() {
-        _apiKeyController.text = ApiConfig.stabilityAiApiKey;
-      });
-      await ApiKeyService.saveApiKey(ApiConfig.stabilityAiApiKey);
-    }
   }
 
   Future<void> _generateImage() async {
@@ -62,23 +39,6 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
       return;
     }
 
-    final apiKey = _apiKeyController.text.trim();
-    if (apiKey.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter your Stability AI API key';
-      });
-      return;
-    }
-
-    if (!ApiKeyService.isValidApiKey(apiKey)) {
-      setState(() {
-        _errorMessage = 'Invalid API key format. It should start with "sk-"';
-      });
-      return;
-    }
-
-    await ApiKeyService.saveApiKey(apiKey);
-
     setState(() {
       _isGenerating = true;
       _errorMessage = null;
@@ -86,7 +46,7 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
     });
 
     try {
-      _stabilityService = StabilityAIService(apiKey: apiKey);
+      _stabilityService = StabilityAIService(apiKey: ApiConfig.stabilityAiApiKey);
 
       final request = StabilityAIRequest(
         prompt: _promptController.text.trim(),
@@ -128,17 +88,6 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextField(
-              controller: _apiKeyController,
-              decoration: const InputDecoration(
-                labelText: 'Stability AI API Key',
-                hintText: 'Enter your API key',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 16),
-            
             TextField(
               controller: _promptController,
               maxLines: 3,
