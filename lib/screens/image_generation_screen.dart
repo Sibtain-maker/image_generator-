@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../services/stability_ai_service.dart';
 import '../services/api_key_service.dart';
 import '../models/stability_ai_models.dart';
+import '../config/api_config.dart';
 
 class ImageGenerationScreen extends StatefulWidget {
   const ImageGenerationScreen({super.key});
@@ -45,6 +46,11 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
       setState(() {
         _apiKeyController.text = savedApiKey;
       });
+    } else {
+      setState(() {
+        _apiKeyController.text = ApiConfig.stabilityAiApiKey;
+      });
+      await ApiKeyService.saveApiKey(ApiConfig.stabilityAiApiKey);
     }
   }
 
@@ -80,7 +86,7 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
     });
 
     try {
-      _stabilityService = StabilityAIService(apiKey: _apiKeyController.text.trim());
+      _stabilityService = StabilityAIService(apiKey: apiKey);
 
       final request = StabilityAIRequest(
         prompt: _promptController.text.trim(),
