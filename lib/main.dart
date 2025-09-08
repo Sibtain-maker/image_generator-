@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'widgets/auth_wrapper.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
+import 'screens/image_generation_screen.dart';
 import 'services/auth_service.dart';
 
 Future<void> main() async {
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignupScreen(),
         '/home': (context) => const MyHomePage(title: 'Image Generator'),
+        '/generate': (context) => const ImageGenerationScreen(),
       },
       home: AuthWrapper(
         child: const MyHomePage(title: 'Image Generator'),
@@ -67,10 +69,33 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      body: const Center(
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[Text('Welcome to Image Generator')],
+          children: <Widget>[
+            const Text(
+              'Welcome to Image Generator',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Create amazing images with AI using Stability AI',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pushNamed(context, '/generate');
+              },
+              icon: const Icon(Icons.create),
+              label: const Text('Generate Image'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
         ),
       ),
     );
