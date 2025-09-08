@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../services/stability_ai_service.dart';
+import '../services/api_key_service.dart';
 import '../models/stability_ai_models.dart';
 
 class ImageGenerationScreen extends StatefulWidget {
@@ -25,11 +26,26 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
   StabilityAIService? _stabilityService;
 
   @override
+  void initState() {
+    super.initState();
+    _loadSavedApiKey();
+  }
+
+  @override
   void dispose() {
     _promptController.dispose();
     _negativePromptController.dispose();
     _apiKeyController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSavedApiKey() async {
+    final savedApiKey = await ApiKeyService.getApiKey();
+    if (savedApiKey != null) {
+      setState(() {
+        _apiKeyController.text = savedApiKey;
+      });
+    }
   }
 
   Future<void> _generateImage() async {
@@ -40,12 +56,22 @@ class _ImageGenerationScreenState extends State<ImageGenerationScreen> {
       return;
     }
 
-    if (_apiKeyController.text.trim().isEmpty) {
+    final apiKey = _apiKeyController.text.trim();
+    if (apiKey.isEmpty) {
       setState(() {
         _errorMessage = 'Please enter your Stability AI API key';
       });
       return;
     }
+
+    if (!ApiKeyService.isValidApiKey(apiKey)) {
+      setState(() {
+        _errorMessage = 'Invalid API key format. It should start with "sk-"';
+      });
+      return;
+    }
+
+    await ApiKeyService.saveApiKey(apiKey);
 
     setState(() {
       _isGenerating = true;
