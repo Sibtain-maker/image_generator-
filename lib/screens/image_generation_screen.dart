@@ -1,3 +1,4 @@
+// Non-functional comment for GitHub push. No effect on app behavior.
 import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:math' as math;
